@@ -1,6 +1,6 @@
 [package]
 name = "totall"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["robiot"]
 description = "totall - Count lines in all files in directories and subdirectories easily"
 license = "MIT"
