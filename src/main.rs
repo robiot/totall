@@ -2,13 +2,16 @@ use std::path::Path;
 use std::fs::metadata;
 use path_clean::PathClean;
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 fn print_error<T: std::string::ToString>(err: T) {
     eprintln!("totall: {}", err.to_string());
 }
 
 fn print_help(args: Vec<String>) {
     println!(
-        "Usage: {} <file/folder>", args[0]
+        "totall v{} \
+        \nUsage: {} <file/folder>", VERSION, args[0]
     )
 }
 
@@ -60,7 +63,6 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 2 {
-        print_error("No path given.");
         print_help(args);
         return;
     }
@@ -100,6 +102,5 @@ fn main() {
         }
     } else {
         print_error("Given path does not exist.");
-        print_help(args);
     }
 }
