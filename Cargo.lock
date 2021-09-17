@@ -9,8 +9,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d5d5a4a243b9cf052d37af99679cc93b08a791f444a4a1b21bb4efcaf01847d8"
 
 [[package]]
+name = "path-clean"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecba01bf2678719532c5e3059e0b5f0811273d94b397088b82e3bd0a78c78fdd"
+
+[[package]]
 name = "totall"
 version = "0.1.0"
 dependencies = [
  "linecount",
+ "path-clean",
 ]
