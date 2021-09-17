@@ -9,3 +9,4 @@ edition = "2018"
 
 [dependencies]
 linecount = "0.1.0"
+path-clean = "0.1.0"
