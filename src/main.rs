@@ -18,7 +18,11 @@ fn get_all_files(dir_name: &str) -> Result<Vec<String>, std::io::Error>
             all_files.append(&mut vec!(path.unwrap().path().to_str().unwrap().to_string()));
         }
     }
-    return Ok(all_files)
+    Ok(all_files)
+}
+
+fn read_lines(file_name: String) -> Result<usize, std::io::Error> {
+    Ok(linecount::count_lines(std::fs::File::open(file_name)?)? + 1)
 }
 
 fn main() {
@@ -29,10 +33,15 @@ fn main() {
         return;
     }
 
-    let path: &str = &args[1];
+    let mut path: &str = &args[1];
     if Path::new(path).exists() {
         let md = metadata(path).unwrap();
         if md.is_dir() {
+            let current_dir = std::env::current_dir().unwrap();
+            if path == "." {
+                path = current_dir.to_str().unwrap();
+            }
+
             let files: Vec<String> = match get_all_files(path) {
                 Ok(m) => m,
                 Err(err) => {
@@ -41,15 +50,14 @@ fn main() {
                 }
             };
 
-            let mut count: i32 = 0;
+            let mut count: usize = 0;
             for file in files {
-                count += 1;
-                println!("{}", file)
+                count += read_lines(file).unwrap();
             }
             println!("{}", count);
 
         } else if md.is_file() {
-
+            println!("{}", read_lines(path.to_string()).unwrap());
         }
     } else {
         print_error("Given path does not exist.")
