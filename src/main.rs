@@ -26,7 +26,7 @@ fn absolute_path(path: impl AsRef<Path>) -> std::io::Result<std::path::PathBuf> 
     Ok(absolute_path)
 }
 
-fn get_all_files(dir_name: &str) -> Result<Vec<String>, std::io::Error>
+fn get_all_files(dir_name: &str) -> std::io::Result<Vec<String>>
 {
     let mut all_files: Vec<String> = vec!();
     let paths;
@@ -55,8 +55,30 @@ fn get_all_files(dir_name: &str) -> Result<Vec<String>, std::io::Error>
     Ok(all_files)
 }
 
-fn read_lines(file_name: String) -> Result<usize, std::io::Error> {
+fn read_lines(file_name: String) -> std::io::Result<usize> {
     Ok(linecount::count_lines(std::fs::File::open(file_name)?)? + 1)
+}
+
+fn path_count(path: &str) -> std::io::Result<usize> {
+    let md = metadata(path).unwrap();
+    if md.is_dir() {
+        let files: Vec<String> = match get_all_files(path) {
+            Ok(f) => f,
+            Err(err) => return Err(err)
+        };
+
+        let mut count: usize = 0;
+        for file in files {
+            count += match read_lines(file) {
+                Ok(m) => m,
+                Err(err) => return Err(err)
+            };
+        }
+        return Ok(count);
+    } else if md.is_file() {
+        return read_lines(path.to_string())
+    }
+    Err(std::io::Error::from(std::io::ErrorKind::InvalidInput))
 }
 
 fn main() {
@@ -67,40 +89,22 @@ fn main() {
         return;
     }
 
-    let path: &str = &args[1];
-    if Path::new(path).exists() {
-        let md = metadata(path).unwrap();
-        if md.is_dir() {
-            let files: Vec<String> = match get_all_files(path) {
-                Ok(m) => m,
-                Err(err) => {
-                    print_error(err);
-                    return;
-                }
-            };
-
-            let mut count: usize = 0;
-            for file in files {
-                count += match read_lines(file) {
-                    Ok(m) => m,
-                    Err(err) => {
-                        print_error(err);
-                        continue;
-                    }
-                };
-            }
-            println!("{}", count);
-
-        } else if md.is_file() {
-            println!("{}", match read_lines(path.to_string()) {
-                Ok(m) => m,
-                Err(err) => {
-                    print_error(err);
-                    return;
-                }
-            });
+    let mut count: usize = 0;
+    for i in 1..args.len() {
+        let path: &str = &args[i];
+        if !Path::new(path).exists() {
+            print_error(format!("path does not exist: {}", path));
+            continue;
         }
-    } else {
-        print_error("Given path does not exist.");
+
+        count += match path_count(path) {
+            Ok(s) => s,
+            Err(err) => {
+                print_error(err);
+                continue;
+            }
+        }
     }
+
+    println!("Total lines: {}", count);
 }
