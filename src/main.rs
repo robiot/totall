@@ -93,6 +93,7 @@ fn main() {
             };
         } else {
             print_error(format!("Path does not exist: {}", path));
+            return;
         }
     }
 
